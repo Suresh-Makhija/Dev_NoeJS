@@ -3,7 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 // Load User model
-const User = require('../models/User');
+const User = require('../models/User_Tbl');
+const Counter = require('../models/Counter_Tbl');
 const { forwardAuthenticated } = require('../config/auth');
 
 // Login Page
@@ -57,27 +58,52 @@ router.post('/register', (req, res) => {
           type
         });
 
-        bcrypt.genSalt(10, (err, salt) => {
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-            newUser.password = hash;
-            newUser
-              .save()
-              .then(user => {
-                req.flash(
-                  'success_msg',
-                  'You are now registered and can log in'
-                );
-                res.redirect('/users/login');
-              })
-              .catch(err => console.log(err));
+
+          Counter.findOne({ counter_id: "user" }).then(counter => {
+            if (counter) {
+              Counter.updateOne({counter_id: "user"}, {
+                  sequence_value : parseInt(counter.sequence_value) + 1
+    }, function(err, numberAffected, rawResponse) {
+
+              bcrypt.genSalt(10, (err, salt) => {
+                bcrypt.hash(newUser.password, salt, (err, hash) => {
+                  if (err) throw err;
+                  newUser.password = hash;
+                 newUser.user_id = counter.sequence_value;
+                  newUser
+                    .save()
+                    .then(user => {
+                      req.flash(
+                        'success_msg',
+                        'You are now registered and can log in'
+                      );
+                      res.redirect('/users/login');
+                    })
+                    .catch(err => console.log(err));
+                });
+              });
+    })
+          }
           });
-        });
       }
     });
   }
 });
-
+// function getNextSequenceValue(sequenceName){
+//   Counter.findOne({ counter_id: sequenceName }).then(counter => {
+//     if (counter) {
+//        let countValue = counter.sequence_value;
+//
+//
+//
+//
+//        Counter.update({ counter_id: sequenceName },{
+//          sequence_value : countValue + 1,
+//        }
+//     }
+//   });}
+//  return countValue;
+// }
 // Login
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {

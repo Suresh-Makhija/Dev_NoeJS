@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
-const UserSchema = new mongoose.Schema({
+const User_TblSchema = new mongoose.Schema({
+  user_id:{
+    type:String,
+    require:true
+  },
   name: {
     type: String,
     required: true
@@ -23,6 +27,6 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-const User = mongoose.model('User', UserSchema);
+const User_Tbl = mongoose.model('User_Tbl', User_TblSchema);
 
-module.exports = User;
+module.exports = User_Tbl;
