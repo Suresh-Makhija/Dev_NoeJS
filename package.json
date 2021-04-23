@@ -11,17 +11,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
-    "ejs": "^2.6.1",
-    "express": "^4.16.4",
+    "cors": "^2.8.5",
+    "ejs": "^2.7.4",
+    "express": "^4.17.1",
     "express-ejs-layouts": "^2.5.0",
     "express-session": "^1.15.6",
+    "highcharts": "^9.0.1",
     "mongoose": "^5.12.4",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.18.9"
+    "nodemon": "^2.0.7"
   }
 }

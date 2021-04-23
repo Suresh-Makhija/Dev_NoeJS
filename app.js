@@ -1,3 +1,9 @@
+
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+const dashboardRoutes = require('./routes/dashboard-Routes');
+
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
@@ -9,9 +15,12 @@ const app = express();
 
 app.use(express.static(__dirname + '/public'))
 
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 // Passport Config
 require('./config/passport')(passport);
-
+ app.use(dashboardRoutes.routes);
 // DB Config
 const db = require('./config/keys').mongoURI;
 
