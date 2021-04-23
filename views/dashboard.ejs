@@ -1,4 +1,258 @@
-<% include ./header %>
-<h1 class="mt-4">Dashboard</h1>
-<p class="lead mb-3">Welcome <%= user.name %></p>
-<p class="lead mb-3">Welcome <%= user.type %></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link  href="/stylesheet/bootstrap.min.css" type="text/css">
+    <link  href="/stylesheet/style.css" type="text/css">
+    <link  href="/stylesheet/main.css" type="text/css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 p-1">
+                <div class="card bg-light mb-3 shadow">
+                    <div class="card-body">
+                        <div id="barChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<!-- <script src="/js/main.js" ></script> -->
+<script type="text/javascript">
+$(document).ready(function() {
+    patientHistoryData("year");
+  });
+
+
+  const patientHistoryData = async (chartType) => {
+      let durationArray = [];
+      let PatientCount = [];
+      await $.ajax({
+          url: '/patientHistoryData',
+          type: 'GET',
+          data:{chartType:chartType},
+          datatype: 'json',
+          success: (response) => {
+              if(response !== null){
+                  response.forEach(element => {
+                      if(chartType == "year")
+                     {durationArray.push(element.date);}
+                     if(chartType == "month")
+                     {
+                       let month = "-";
+                       let monthNumber = element.date;
+                       if(monthNumber == "01")
+                        month = "January";
+                       if(monthNumber == "02")
+                       month = "February";
+                       if(monthNumber == "03")
+                       month = "March";
+                       if(monthNumber == "04")
+                       month = "April";
+                       if(monthNumber == "05")
+                       month = "May";
+                       if(monthNumber == "06")
+                       month = "June";
+                       if(monthNumber == "07")
+                       month = "July";
+                       if(monthNumber == "08")
+                       month = "August";
+                       if(monthNumber == "09")
+                       month = "September";
+                       if(monthNumber == "10")
+                       month = "October";
+                       if(monthNumber == "11")
+                       month = "November";
+                       if(monthNumber == "12")
+                       month = "December";
+
+                       durationArray.push(month);
+                     }
+                     if(chartType == "week")
+                     {
+                       var weekDayDate = element.date.split("-");
+                       var weekDay = new Date(weekDayDate[2], weekDayDate[1] - 1, weekDayDate[0]);
+                       weekDay = weekDay.getDay();
+                       var week = "-";
+                       if(weekDay == "0")
+                        week = "Sunday";
+                        if(weekDay == "1")
+                         week = "Monday";
+                         if(weekDay == "2")
+                          week = "Tuesday";
+                          if(weekDay == "3")
+                           week = "Wednesday";
+                           if(weekDay == "4")
+                            week = "Thursday";
+                            if(weekDay == "5")
+                             week = "Friday";
+                             if(weekDay == "6")
+                              week = "Saturday";
+                       durationArray.push(week);
+                     }
+                     PatientCount.push(element.count);
+                  });
+              }
+          },
+          error: (err) => {
+              console.log(err);
+          }
+      })
+      Highcharts.chart('barChart', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Patient History'
+        },
+        subtitle: {
+              text: chartType
+                  },
+        yAxis: {
+            title: {
+                text: 'Count'
+            }
+        },
+
+        xAxis: {
+            categories: durationArray,
+            crosshair: true
+        },
+
+        exporting: {
+            buttons: {
+                weekBtn: {
+                    text: 'week',
+                    onclick: function () {
+                        patientHistoryData("week");
+                    }
+                },
+               monthBtn: {
+                    text: 'month',
+                    onclick: function () {
+                        patientHistoryData("month");
+                    }
+                },
+                yearBtn: {
+                     text: 'year',
+                     onclick: function () {
+                         patientHistoryData("year");
+                     }
+                 }
+            }
+        }
+        ,
+        legend: {
+            layout: 'horizontal',
+            align: 'center',
+            verticalAlign: 'bottom'
+        },
+        series: [{
+            name: 'Duration',
+            color: '#33F4FF',
+            data: PatientCount
+        }],
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+      });
+  }
+
+
+
+
+
+
+    const pieChartData = async () => {
+        let confirmedData = 0;
+        let deathsData = 0;
+        let recoveredData = 0;
+      await $.ajax({
+            url: '/piechartData',
+            type: 'GET',
+            datatype: 'json',
+            success: (response) => {
+                if(response !== null) {
+                    const {confirmed, deaths, recovered} = response;
+                    const total = confirmed.value + deaths.value + recovered.value;
+                    confirmedData = parseFloat(((confirmed.value / total) * 100).toFixed(2));
+                    deathsData = parseFloat(((deaths.value / total) * 100).toFixed(2));
+                    recoveredData = parseFloat(((recovered.value / total) * 100).toFixed(2));
+                }
+            },
+            error: (err) => {
+                console.log(err);
+            }
+        });
+        Highcharts.chart('pieChart', {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: 'Covid-19 Confirmed, Deaths, Recovered'
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            series: [{
+                name: 'Data',
+                colorByPoint: true,
+                data: [{
+                    name: 'Confirmed',
+                    y: confirmedData,
+                    selected: true,
+                    color: '#33F4FF'
+                }, {
+                    name: 'Deaths',
+                    y: deathsData,
+                    color: '#FF3633'
+                }, {
+                    name: 'Recovered',
+                    y: recoveredData,
+                    color: '#56FF33'
+                }]
+            }]
+        });
+    }
+
+</script>
