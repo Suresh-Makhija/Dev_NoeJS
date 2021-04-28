@@ -30,12 +30,11 @@ patient_id:{
     type: String
   },
   insert_date_time: {
-    type: String,
-    required: true
+    type: Date,
+    default: Date.now
   },
   photo: {
-    contentType: String,
-    data: Buffer
+    type: String
   }
 });
 

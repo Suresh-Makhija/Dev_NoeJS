@@ -18,8 +18,8 @@ const Patient_Diagno_History_TblSchema = new mongoose.Schema({
     require:true
   },
   insert_date_time:{
-    type:String,
-    require:true
+    type: Date,
+    default: Date.now
   }
 });
 
