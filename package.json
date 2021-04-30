@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "express-ejs-layouts": "^2.5.0",
     "express-session": "^1.15.6",
+    "fusioncharts": "^3.16.0",
     "highcharts": "^9.0.1",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
@@ -29,6 +30,7 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
+    "google-charts": "^2.0.0",
     "nodemon": "^2.0.7"
   }
 }
