@@ -10,8 +10,8 @@ const Master_Medicine_tblSchema = new mongoose.Schema({
     require:true
   },
   insert_date_time:{
-    type:String,
-    require:true
+    type: Date,
+    default: Date.now
   },
   master_diagno_id:{
     type:String,
