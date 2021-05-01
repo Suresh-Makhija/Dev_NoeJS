@@ -21,10 +21,7 @@ const Patient_Medicine_History_TblSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  insert_date_time:{
-    type:String,
-    require:true
-  },
+  
   medicine_Qty:{
     type:Number,
     require:true
