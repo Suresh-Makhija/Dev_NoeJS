@@ -3,6 +3,7 @@ var multer = require('multer');
 var path = require('path');
 var moment = require('moment');
 var moment_timezone = require('moment-timezone');
+var NumberInt = require("mongodb").Int32;
 const router = express.Router();
 const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
@@ -260,5 +261,88 @@ Patient_Tbl.findOne({mobile_no:mobile_no}).then(patienttbl => {
 
   }
 });
+
+
+
+router.get('/appointment_details', ensureAuthenticated, (req, res) => {
+
+
+  var pipeline = [
+    { 
+      "$project" : { 
+          "a" : "$$ROOT"
+      }
+  },  
+  { 
+      "$lookup" : { 
+          "localField" : "a.patient_id", 
+          "from" : "patient_appointment_tbls", 
+          "foreignField" : "patient_id", 
+          "as" : "b"
+      }
+  }, 
+  { 
+      "$unwind" : { 
+          "path" : "$b", 
+          "preserveNullAndEmptyArrays" : true
+      }
+  }, 
+  { 
+      "$lookup" : { 
+          "localField" : "a.patient_id", 
+          "from" : "appointment_cnt_view", 
+          "foreignField" : "patient_id", 
+          "as" : "c"
+      }
+  }, 
+  { 
+      "$unwind" : { 
+          "path" : "$c", 
+          "preserveNullAndEmptyArrays" : true
+      }
+  }, 
+   
+  { 
+      "$sort" : { 
+          "a.patient_id" : NumberInt(1),
+          "b.appointment_date_time" : NumberInt(-1)
+      }
+  }, 
+  { 
+      "$project" : { 
+          "patient_Objid" : "$a._id", 
+          "patient_id" : "$a.patient_id", 
+          "first_name" : "$a.first_name", 
+          "last_name" : "$a.last_name", 
+          "mobile_no" : "$a.mobile_no", 
+          "age" : "$a.age", 
+          "email_address" : "$a.email_address", 
+          "photo" : "$a.photo", 
+          "appointment_date_time" : { $ifNull: [ { $dateToString: { format: "%d/%m/%Y %H:%M:%S", 
+          date: "$b.appointment_date_time" }} , ""]}, 
+          "appointment_Objid" : "$b._id", 
+          "appointment_id" : "$b.appointment_id", 
+          "cnt" : "$c.cnt"
+      }
+  }
+];
+
+  Patient_Tbl.aggregate(pipeline,function(err,result)
+  
+  {
+    if(err)
+    {
+      let errors = [];
+      errors.push({ msg: err});
+      res.render('appointment_details', {errors,title: 'Appoinments Details', records:''});
+
+    }else
+    {
+        res.render('appointment_details', {title: 'Appoinments Details', records:result});
+    }
+  }
+  );
+});
+
 
 module.exports = router;
