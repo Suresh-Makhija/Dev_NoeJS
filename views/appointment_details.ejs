@@ -1,0 +1,83 @@
+<%include ./header%>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <link href='/stylesheets/style.css' type="text/css" />
+
+    </head>
+    <body>
+       
+        <div id="main-content">
+            <div class="container-fluid">
+                <div class="block-header">
+                    <div class="row">
+                      
+                        <div class="col-lg-6 col-md-8 col-sm-12">
+                            <h2><a href="/dashboard" class="btn btn-xs btn-link btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a>Appointment Details</h2>
+                        </div>            
+               
+                    </div>
+                </div>
+
+
+                <% include ./partials/messages %>
+                <!-- <form  method="POST" id="userform" name="userform" autocomplete="off" role="form" enctype="multipart/form-data"> -->
+
+                <div class="row clearfix">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <div class="card">
+                            <div class="body">
+                                <%if (records.length >0){ %>
+                               <table class="table" width="100%">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;"><b>SR.NO</b></th>
+                                            <th style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;"><b>FULL NAME</b></th>
+                                            <th style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;"><b>MOBILE NO</b></th>
+                                            <th style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;"><b>APPOINTMENT DATE</b></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <% var index = 1; %>
+                                        <% var rownum = 0; %>
+                                      
+
+                                        <%if (records.length >0){ %>
+                                            <% records.forEach(function(row){ %>
+                                              <tr>
+                                                <%if (row.patient_id != rownum){ %>
+                                                    <td style="text-align: center;vertical-align: middle; border: solid 1px; border-collapse: collapse;" rowspan="<%=row.cnt%>"><%=index%></td>
+                                                    <td style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;" rowspan="<%=row.cnt%>"><%=row.first_name%> <%=row.last_name%> </td>
+                                                    <td style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;" rowspan="<%=row.cnt%>"><%=row.mobile_no%></td>
+                                                <% } %>
+                                                    <td style="text-align: center; vertical-align: middle; border: solid 1px; border-collapse: collapse;" > <%=row.appointment_date_time%> </td>
+                                           
+                                          <%if (row.patient_id != rownum){ %>
+                                                    <%  index = index+1; %>
+                                           <% } %> 
+                                                </tr>
+                                               <% rownum = row.patient_id; %>
+                                            <% }) }  %>
+                                    </tbody>
+                             </table>
+                                
+                               <% } else { %>
+                                NO DATA FOUND
+                                <%  }  %>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <!-- </form> -->
+            </div>
+        </div>
+
+    </body>
+</html>
+
