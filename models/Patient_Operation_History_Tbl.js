@@ -20,6 +20,10 @@ const Patient_Operation_History_TblSchema = new mongoose.Schema({
   insert_date_time:{
     type: Date,
     default: Date.now
+  },
+  total_price_per_operation:{
+    type: Number,
+    require:true
   }
   });
 
