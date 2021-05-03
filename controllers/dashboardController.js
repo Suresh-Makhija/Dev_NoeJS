@@ -8,8 +8,91 @@ const dashboard = (req, res, next) => {
 }
 
 
+const totalOperation =
+
+async(req,res,result) =>{
+
+  try{
+    Operation.aggregate(
+    [
+
+        {
+            $group:
+            {
+                _id:
+                {
+                    month: { $month: "$insert_date_time" }
+                },
+                count: { $sum:1 }
+
+
+            }},
+            {
+                $project:
+                {
+
+                    count: 1,
+                    _id: 0
+                }
+            }
+
+
+
+    ],function(err,result1){
+
+      res.json(result1);
+
+    });
+  }
+  catch (error){
+    res.send(error.message);
+  }
+
+}
+
+const totalPatient = async(req,res,result) =>{
+
+  try{
+    Patient.aggregate(
+    [
+
+        {
+            $group:
+            {
+                _id:
+                {
+                    month: { $month: "$insert_date_time" }
+                },
+                count: { $sum:1 }
+
+
+            }},
+            {
+                $project:
+                {
+
+                    count: 1,
+                    _id: 0
+                }
+            }
+
+
+
+    ],function(err,result1){
+
+      res.json(result1);
+
+    });
+  }
+  catch (error){
+    res.send(error.message);
+  }
+
+}
 const revenueData = async (req,res,next) =>{
   try{
+
+
         let chartType =  req.query.chartType;
         if(chartType == "year")
         {
@@ -45,17 +128,172 @@ const revenueData = async (req,res,next) =>{
 
 
 
-          ],function(err,result){console.log(result);res.status(200).json(result);});
+          ],function(err,result1){
 
+            res.json(result1);
+
+          });
         }
+        if(chartType == "month")
+        {
+          let currentMonth = 0;
+          let nextMonth = 0;
+        if(req.query.month.length == 1)
+        {
 
+          nextMonth = parseInt("0"+req.query.month)  +2;
+          currentMonth = parseInt("0"+req.query.month)  +1;
+        }
+        else {
+          nextMonth = parseInt(req.query.month)  +2;
+          currentMonth = parseInt(req.query.month)  +1;
+        }
+          let lessYear = req.query.year+"-"+nextMonth+"-01";
+          let greatYear = req.query.year+"-"+currentMonth+"-01";;
+
+          console.log(lessYear);
+          PaMedical.aggregate(
+          [
+            { $match: { insert_date_time: { $lt: new Date(lessYear), $gte: new Date(greatYear) } } },
+              {
+                  $group:
+                  {
+                      _id:
+                      {
+                          day: { $dayOfMonth: "$insert_date_time" }
+                      },
+                      medicine: { $sum:"$total_price_per_medicine" }
+                     ,
+                       insert_date_time: { $first: "$insert_date_time" }
+                  }},
+                  {
+                      $project:
+                      {
+                          date:
+                          {
+                              $dateToString: { format: "%d", date: "$insert_date_time" }
+                          },
+                          medicine: 1,
+                          _id: 0
+                      }
+                  }
+
+
+
+          ],function(err,result1){
+            console.log(result1);
+            res.json(result1);
+
+          });
+        }
   }
+
   catch (error) {
           res.status(400).send(error.message);
       }
 
 }
+const operationRevenueData = async (req, res, next) => {
+  try {
+   let chartType =  req.query.chartType;
 
+
+  if(chartType == "year")
+  {
+    let Chartyear =  req.query.year;
+    let lessYear = (parseInt(Chartyear)+1)+"-01-01";
+    let greatYear = Chartyear+"-01-01";
+Operation.aggregate(
+[
+  { $match: { insert_date_time: { $lt: new Date(lessYear), $gte: new Date(greatYear) } } },
+    {
+        $group:
+        {
+            _id:
+            {
+                month: { $month: "$insert_date_time" }
+            },
+            operation: { $sum:"$total_price_per_operation" }
+           ,
+             insert_date_time: { $first: "$insert_date_time" }
+        }},
+        {
+            $project:
+            {
+                date:
+                {
+                    $dateToString: { format: "%m", date: "$insert_date_time" }
+                },
+                operation: 1,
+                _id: 0
+            }
+        }
+
+
+
+],function(err,result){
+   res.json(result);
+});
+}
+if(chartType == "month")
+{
+  let currentMonth = 0;
+  let nextMonth = 0;
+if(req.query.month.length == 1)
+{
+
+  nextMonth = parseInt("0"+req.query.month)  +2;
+  currentMonth = parseInt("0"+req.query.month)  +1;
+}
+else {
+  nextMonth = parseInt(req.query.month)  +2;
+  currentMonth = parseInt(req.query.month)  +1;
+}
+  let lessYear = req.query.year+"-"+nextMonth+"-01";
+  let greatYear = req.query.year+"-"+currentMonth+"-01";;
+
+
+  Operation.aggregate(
+  [
+    { $match: { insert_date_time: { $lt: new Date(lessYear), $gte: new Date(greatYear) } } },
+      {
+          $group:
+          {
+              _id:
+              {
+                  day: { $dayOfMonth: "$insert_date_time" }
+              },
+              operation: { $sum:"$total_price_per_operation" }
+             ,
+               insert_date_time: { $first: "$insert_date_time" }
+          }},
+          {
+              $project:
+              {
+                  date:
+                  {
+                      $dateToString: { format: "%d", date: "$insert_date_time" }
+                  },
+                  operation: 1,
+                  _id: 0
+              }
+          }
+
+
+
+  ],function(err,result1){
+
+    res.json(result1);
+
+  });
+}
+
+}
+catch (error) {
+        res.status(400).send(error.message);
+    }
+
+}
 const operationHistoryData = async (req, res, next) => {
   try {
    let chartType =  req.query.chartType;
@@ -239,5 +477,8 @@ module.exports = {
     dashboard,
     operationHistoryData,
     patientHistoryData,
-    revenueData
+    revenueData,
+    operationRevenueData,
+    totalPatient,
+    totalOperation
 }
