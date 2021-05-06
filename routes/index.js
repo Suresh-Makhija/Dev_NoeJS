@@ -28,6 +28,8 @@ var upload = multer({
 // Welcome Page
 router.get('/', forwardAuthenticated, (req, res) => res.render('welcome'));
 
+router.get('/header',(req, res) => res.render('header'));
+
 // Dashboard
 router.get('/dashboard', ensureAuthenticated, (req, res) =>
   res.render('dashboard', {
